@@ -1,0 +1,28 @@
+from numpy import exp, cos, pi
+
+
+def activation_ventricle(t, T, T_es=0.3, tau=0.025):
+    t_v = t % T
+    if t_v < T_es:
+        return 0.5 * (1.0 - cos(pi * t_v / T_es))
+    else:
+        return exp(-(t_v - T_es) / tau)
+
+
+def activation_atrium(t, T, T_as=0.12, onset_frac=0.70):
+    t_a = (t % T) - onset_frac * T
+    if t_a < T_as:
+        return 0.5 * (1.0 - cos(pi * t_a / T_as))
+    else:
+        return 0.0
+
+
+def edpvr_exp(V, V0, alpha, beta):
+    # Klotz formulation. might need to revisit if volumes get large.
+    return alpha * (exp(beta * (V - V0)) - 1)
+
+
+def chamber_pressure(V, e, E_es, V_d, V0, alpha, beta):
+    P_active = e * E_es * (V - V_d)
+    P_passive = edpvr_exp(V, V0, alpha, beta)
+    return P_active + (1.0 - e) * P_passive
