@@ -31,7 +31,7 @@ def rhs(t, y, p):
 
     dV_lv = Q_mv - Q_av
     dV_la = Q_return - Q_mv
-    dV_sa = Q_sys - Q_av
+    dV_sa = Q_av - Q_sys   # was backwards, took me an hour to find this
     dV_sv = Q_sys - Q_return
 
     return [dV_lv, dV_la, dV_sa, dV_sv]
