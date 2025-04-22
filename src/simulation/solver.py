@@ -5,7 +5,7 @@ from ..model.heart import rhs
 
 def simulate(p, n_beats=20, n_eval=500):
     T = p.T
-    y0 = [120.0, 60.0, 900.0, 3200.0]
+    y0 = [120.0, 60.0, 120.0, 60.0, 900.0, 3200.0, 170.0, 370.0]
     y_cur = np.array(y0)
 
     for beat in range(n_beats):
