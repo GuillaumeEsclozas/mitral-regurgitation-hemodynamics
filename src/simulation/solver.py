@@ -1,12 +1,12 @@
 import numpy as np
 from scipy.integrate import solve_ivp
 from ..model.heart import rhs
+from ..model.constants import INITIAL_VOLUMES
 
 
 def simulate(p, n_beats=20, n_eval=500):
     T = p.T
-    y0 = [120.0, 60.0, 120.0, 60.0, 900.0, 3200.0, 170.0, 370.0]
-    y_cur = np.array(y0)
+    y_cur = INITIAL_VOLUMES.copy()
 
     for beat in range(n_beats):
         t_s = beat * T
