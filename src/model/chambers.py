@@ -11,6 +11,9 @@ def activation_ventricle(t, T, T_es=0.3, tau=0.025):
 
 def activation_atrium(t, T, T_as=0.12, onset_frac=0.70):
     t_a = (t % T) - onset_frac * T
+    # was missing the wraparound, atria were contracting at wrong time
+    if t_a < 0:
+        t_a += T
     if t_a < T_as:
         return 0.5 * (1.0 - cos(pi * t_a / T_as))
     else:
