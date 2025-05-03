@@ -20,12 +20,6 @@ def activation_atrium(t, T, T_as=0.12, onset_frac=0.70):
         return 0.0
 
 
-# REMOVED: this gives 162000 mmHg at V=180, completely
-# unusable for MR simulations where volumes go high
-# def edpvr_exp(V, V0, alpha, beta):
-#     return alpha * (exp(beta * (V - V0)) - 1)
-
-# was exponential before, power law handles large volumes
 def edpvr(V, V0, alpha, beta, V_ref):
     return alpha * (max(V - V0, 0) / V_ref) ** beta
 
