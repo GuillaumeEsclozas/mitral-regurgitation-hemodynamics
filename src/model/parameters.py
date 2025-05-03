@@ -5,17 +5,17 @@ class Params:
         self.E_es_lv = 2.7
         self.V_d_lv = 10.0
         self.V0_lv = 10.0
-        self.alpha_lv = 0.05
-        self.beta_lv = 0.03
+        self.alpha_lv = 10.0
+        self.V_ref_lv = 110.0
         self.T_es_lv = 0.3
         self.tau_lv = 0.025
 
-        # LA
+        # LA  (V_ref will need tuning, using same as LV for now)
         self.E_es_la = 0.65
         self.V_d_la = 4.0
         self.V0_la = 4.0
-        self.alpha_la = 0.03
-        self.beta_la = 0.03
+        self.alpha_la = 3.0
+        self.V_ref_la = 110.0
         self.T_as_la = 0.12
         self.onset_la = 0.70
 
@@ -23,8 +23,8 @@ class Params:
         self.E_es_rv = 0.7
         self.V_d_rv = 10.0
         self.V0_rv = 10.0
-        self.alpha_rv = 0.05
-        self.beta_rv = 0.03
+        self.alpha_rv = 10.0
+        self.V_ref_rv = 110.0
         self.T_es_rv = 0.3
         self.tau_rv = 0.025
 
@@ -32,8 +32,8 @@ class Params:
         self.E_es_ra = 0.39
         self.V_d_ra = 4.0
         self.V0_ra = 4.0
-        self.alpha_ra = 0.03
-        self.beta_ra = 0.03
+        self.alpha_ra = 3.0
+        self.V_ref_ra = 110.0
         self.T_as_ra = 0.12
         self.onset_ra = 0.70
 
@@ -60,6 +60,7 @@ class Params:
         self.R_sv_ra = 0.01
 
         self.HR = 75.0
+        self.beta = 2.5   # shared power-law exponent
 
         for k, v in kwargs.items():
             setattr(self, k, v)

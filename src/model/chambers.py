@@ -20,12 +20,17 @@ def activation_atrium(t, T, T_as=0.12, onset_frac=0.70):
         return 0.0
 
 
-def edpvr_exp(V, V0, alpha, beta):
-    # Klotz formulation. might need to revisit if volumes get large.
-    return alpha * (exp(beta * (V - V0)) - 1)
+# REMOVED: this gives 162000 mmHg at V=180, completely
+# unusable for MR simulations where volumes go high
+# def edpvr_exp(V, V0, alpha, beta):
+#     return alpha * (exp(beta * (V - V0)) - 1)
+
+# was exponential before, power law handles large volumes
+def edpvr(V, V0, alpha, beta, V_ref):
+    return alpha * (max(V - V0, 0) / V_ref) ** beta
 
 
-def chamber_pressure(V, e, E_es, V_d, V0, alpha, beta):
+def chamber_pressure(V, e, E_es, V_d, V0, alpha, beta, V_ref):
     P_active = e * E_es * (V - V_d)
-    P_passive = edpvr_exp(V, V0, alpha, beta)
+    P_passive = edpvr(V, V0, alpha, beta, V_ref)
     return P_active + (1.0 - e) * P_passive
