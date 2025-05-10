@@ -1,7 +1,7 @@
 # full 8-compartment closed loop
 
 from .chambers import activation_ventricle, activation_atrium, chamber_pressure
-from .valves import valve_flow
+from .valves import valve_flow, mr_flow
 
 
 def compute_pressures(y, t, p):
@@ -39,16 +39,17 @@ def compute_flows(pressures, p):
     Q_pul = (P_pa - P_pv) / p.R_pul
     Q_pv_la = (P_pv - P_la) / p.R_pv_la
     Q_sv_ra = (P_sv - P_ra) / p.R_sv_ra
-    return Q_mv, Q_av, Q_tc, Q_pv_v, Q_sys, Q_pul, Q_pv_la, Q_sv_ra
+    Q_mr = mr_flow(P_lv, P_la, p.EROA)
+    return Q_mv, Q_av, Q_tc, Q_pv_v, Q_sys, Q_pul, Q_pv_la, Q_sv_ra, Q_mr
 
 
 def rhs(t, y, p):
     pressures = compute_pressures(y, t, p)
-    Q_mv, Q_av, Q_tc, Q_pv_v, Q_sys, Q_pul, Q_pv_la, Q_sv_ra = \
+    Q_mv, Q_av, Q_tc, Q_pv_v, Q_sys, Q_pul, Q_pv_la, Q_sv_ra, Q_mr = \
         compute_flows(pressures, p)
     return [
-        Q_mv - Q_av,
-        Q_pv_la - Q_mv,
+        Q_mv - Q_av - Q_mr,
+        Q_pv_la + Q_mr - Q_mv,
         Q_tc - Q_pv_v,
         Q_sv_ra - Q_tc,
         Q_av - Q_sys,
