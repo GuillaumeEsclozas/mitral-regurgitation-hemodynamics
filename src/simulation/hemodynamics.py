@@ -35,6 +35,24 @@ def compute_waveforms(sol, p):
     }
 
 
+def extract_ea_trough(Q_mv, t):
+    # finds the valley between E and A waves. works ok at normal HR but
+    # probably breaks if waves fuse at high rates
+    peaks = []
+    for i in range(1, len(Q_mv) - 1):
+        if Q_mv[i] > Q_mv[i-1] and Q_mv[i] > Q_mv[i+1] and Q_mv[i] > 20:
+            peaks.append(i)
+    if len(peaks) < 2:
+        return None, 0, 0
+    # trough between first two peaks
+    trough_idx = peaks[0] + np.argmin(Q_mv[peaks[0]:peaks[1]])
+    E_peak = Q_mv[peaks[0]]
+    A_peak = Q_mv[peaks[1]]
+    if A_peak < 5:
+        return None, E_peak, A_peak
+    return E_peak / A_peak, E_peak, A_peak
+
+
 def extract_indices(sol, p):
     w = compute_waveforms(sol, p)
     t = w["t"]
@@ -56,10 +74,13 @@ def extract_indices(sol, p):
     dt = np.diff(t)
     CO = np.sum(np.maximum(0.5 * (w["Q_av"][:-1] + w["Q_av"][1:]), 0) * dt) * p.HR / 1000
 
+    ea, E_pk, A_pk = extract_ea_trough(Q_mv, t)
+
     return {
         "EDV": EDV, "ESV": ESV, "SV": SV, "EF": EF,
         "LVEDP": LVEDP, "SBP": SBP, "DBP": DBP,
         "mean_LAP": mean_LAP, "CO": CO,
+        "EA": ea, "E_pk": E_pk, "A_pk": A_pk,
     }
 
 
