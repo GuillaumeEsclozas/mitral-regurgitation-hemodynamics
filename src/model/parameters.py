@@ -10,12 +10,13 @@ class Params:
         self.T_es_lv = 0.3
         self.tau_lv = 0.025
 
-        # LA  (V_ref will need tuning, using same as LV for now)
+        # LA
+        # with shared V_ref LA was going 77-147 mL, now 21-69 which is reasonable
         self.E_es_la = 0.65
         self.V_d_la = 4.0
         self.V0_la = 4.0
         self.alpha_la = 3.0
-        self.V_ref_la = 110.0
+        self.V_ref_la = 40.0
         self.T_as_la = 0.12
         self.onset_la = 0.70
 
@@ -33,7 +34,7 @@ class Params:
         self.V_d_ra = 4.0
         self.V0_ra = 4.0
         self.alpha_ra = 3.0
-        self.V_ref_ra = 110.0
+        self.V_ref_ra = 40.0
         self.T_as_ra = 0.12
         self.onset_ra = 0.70
 
