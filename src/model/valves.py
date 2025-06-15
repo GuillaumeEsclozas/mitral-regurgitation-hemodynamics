@@ -1,18 +1,17 @@
-# simple valve model, open/close based on pressure gradient
+"""Valve and orifice flow models."""
+
 import numpy as np
+from .chambers import sigmoid
+from .constants import MR_ORIFICE_CONSTANT
 
 
-def valve_flow(P_up, P_down, R_valve):
+def valve_flow(P_up, P_down, R_valve, k=300.0):
+    """Sigmoid-gated valve flow."""
     dP = P_up - P_down
-    if dP <= 0:
-        return 0.0
-    return dP / R_valve
+    return sigmoid(dP, k) * dP / R_valve
 
 
-def mr_flow(P_lv, P_la, EROA):
-    """MR orifice flow, Gorlin-based."""
+def mr_flow(P_lv, P_la, EROA, k=300.0):
+    """Mitral regurgitation orifice flow, sigmoid-smoothed."""
     dP = P_lv - P_la
-    if dP <= 0:
-        return 0.0
-    # 50.16 = conversion factor, see Gorlin formula
-    return EROA * 50.16 * np.sqrt(dP)
+    return sigmoid(dP, k) * EROA * MR_ORIFICE_CONSTANT * np.sqrt(max(dP, 0.0))

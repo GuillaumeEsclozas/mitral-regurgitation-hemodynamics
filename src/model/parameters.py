@@ -62,6 +62,7 @@ class Params:
 
         self.HR = 75.0
         self.EROA = 0.0   # no regurgitation by default
+        self.k_valve = 300.0
         self.beta = 2.5   # shared power-law exponent
 
         for k, v in kwargs.items():
