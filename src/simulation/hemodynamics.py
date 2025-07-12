@@ -64,22 +64,29 @@ def extract_indices(sol, p):
 
     EDV = np.max(V_lv)
     ESV = np.min(V_lv)
-    SV = EDV - ESV
-    EF = SV / EDV * 100
+    SV_total = EDV - ESV
+    # total EF goes UP with MR which is misleading, forward EF is what matters
+    EF = SV_total / EDV * 100
     LVEDP = edpvr(EDV, p.V0_lv, p.alpha_lv, p.beta, p.V_ref_lv)
     SBP = np.max(P_sa)
     DBP = np.min(P_sa)
     mean_LAP = np.mean(P_la)
 
     dt = np.diff(t)
-    CO = np.sum(np.maximum(0.5 * (w["Q_av"][:-1] + w["Q_av"][1:]), 0) * dt) * p.HR / 1000
+    SV_fwd = np.sum(np.maximum(0.5 * (w["Q_av"][:-1] + w["Q_av"][1:]), 0) * dt)
+    RegVol = np.sum(np.maximum(0.5 * (w["Q_mr"][:-1] + w["Q_mr"][1:]), 0) * dt)
+    EF_fwd = SV_fwd / EDV * 100
+    CO = SV_fwd * p.HR / 1000
+    reg_frac = RegVol / SV_total * 100 if SV_total > 0 else 0
 
     ea, E_pk, A_pk = extract_ea_trough(Q_mv, t)
 
     return {
-        "EDV": EDV, "ESV": ESV, "SV": SV, "EF": EF,
+        "EDV": EDV, "ESV": ESV, "SV_total": SV_total,
+        "SV_fwd": SV_fwd, "RegVol": RegVol, "reg_frac": reg_frac,
+        "EF": EF, "EF_fwd": EF_fwd, "CO": CO,
         "LVEDP": LVEDP, "SBP": SBP, "DBP": DBP,
-        "mean_LAP": mean_LAP, "CO": CO,
+        "mean_LAP": mean_LAP,
         "EA": ea, "E_pk": E_pk, "A_pk": A_pk,
     }
 
