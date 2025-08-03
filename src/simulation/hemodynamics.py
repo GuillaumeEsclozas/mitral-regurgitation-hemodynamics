@@ -79,6 +79,14 @@ def extract_indices(sol, p):
     CO = SV_fwd * p.HR / 1000
     reg_frac = RegVol / SV_total * 100 if SV_total > 0 else 0
 
+    # v-wave: peak LA pressure before MV opens
+    mv_open_idx = len(P_la) - 1
+    for i in range(50, len(P_la)):
+        if P_la[i] > P_lv[i]:
+            mv_open_idx = i
+            break
+    v_wave = np.max(P_la[:mv_open_idx])
+
     ea, E_pk, A_pk = extract_ea_trough(Q_mv, t)
 
     return {
@@ -87,6 +95,8 @@ def extract_indices(sol, p):
         "EF": EF, "EF_fwd": EF_fwd, "CO": CO,
         "LVEDP": LVEDP, "SBP": SBP, "DBP": DBP,
         "mean_LAP": mean_LAP,
+        "v_wave": v_wave,
+        "v_wave_ratio": v_wave / mean_LAP if mean_LAP > 0 else 0,
         "EA": ea, "E_pk": E_pk, "A_pk": A_pk,
     }
 
