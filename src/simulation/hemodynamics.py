@@ -98,6 +98,8 @@ def extract_indices(sol, p):
         "v_wave": v_wave,
         "v_wave_ratio": v_wave / mean_LAP if mean_LAP > 0 else 0,
         "EA": ea, "E_pk": E_pk, "A_pk": A_pk,
+        # should be exactly constant, good sanity check
+        "V_total": np.sum(sol.y[:, -1]),
     }
 
 
