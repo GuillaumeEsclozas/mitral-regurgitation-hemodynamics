@@ -54,30 +54,35 @@ def extract_ea_trough(Q_mv, t):
 
 
 def extract_indices(sol, p):
+    """Extract all hemodynamic indices from a simulation solution."""
     w = compute_waveforms(sol, p)
     t = w["t"]
     V_lv = w["V_lv"]
+    V_la = w["V_la"]
+    V_rv = w["V_rv"]
+    V_ra = w["V_ra"]
     P_lv = w["P_lv"]
     P_la = w["P_la"]
     P_sa = w["P_sa"]
+    P_pa = w["P_pa"]
+    P_ra = w["P_ra"]
     Q_mv = w["Q_mv"]
+    Q_av = w["Q_av"]
+    Q_mr = w["Q_mr"]
 
+    # LV volumes and pressures
     EDV = np.max(V_lv)
     ESV = np.min(V_lv)
     SV_total = EDV - ESV
-    # total EF goes UP with MR which is misleading, forward EF is what matters
-    EF = SV_total / EDV * 100
+    dt = np.diff(t)
+    SV_fwd = np.sum(np.maximum(0.5 * (Q_av[:-1] + Q_av[1:]), 0) * dt)
+    RegVol = np.sum(np.maximum(0.5 * (Q_mr[:-1] + Q_mr[1:]), 0) * dt)
     LVEDP = edpvr(EDV, p.V0_lv, p.alpha_lv, p.beta, p.V_ref_lv)
     SBP = np.max(P_sa)
     DBP = np.min(P_sa)
     mean_LAP = np.mean(P_la)
-
-    dt = np.diff(t)
-    SV_fwd = np.sum(np.maximum(0.5 * (w["Q_av"][:-1] + w["Q_av"][1:]), 0) * dt)
-    RegVol = np.sum(np.maximum(0.5 * (w["Q_mr"][:-1] + w["Q_mr"][1:]), 0) * dt)
-    EF_fwd = SV_fwd / EDV * 100
-    CO = SV_fwd * p.HR / 1000
-    reg_frac = RegVol / SV_total * 100 if SV_total > 0 else 0
+    mean_PAP = np.mean(P_pa)
+    mean_RAP = np.mean(P_ra)
 
     # v-wave: peak LA pressure before MV opens
     mv_open_idx = len(P_la) - 1
@@ -88,18 +93,26 @@ def extract_indices(sol, p):
     v_wave = np.max(P_la[:mv_open_idx])
 
     ea, E_pk, A_pk = extract_ea_trough(Q_mv, t)
+    EF = SV_total / EDV * 100
+    EF_fwd = SV_fwd / EDV * 100
+    CO = SV_fwd * p.HR / 1000
+    reg_frac = RegVol / SV_total * 100 if SV_total > 0 else 0
 
     return {
         "EDV": EDV, "ESV": ESV, "SV_total": SV_total,
         "SV_fwd": SV_fwd, "RegVol": RegVol, "reg_frac": reg_frac,
-        "EF": EF, "EF_fwd": EF_fwd, "CO": CO,
-        "LVEDP": LVEDP, "SBP": SBP, "DBP": DBP,
-        "mean_LAP": mean_LAP,
+        "EF": EF, "EF_fwd": EF_fwd, "CO": CO, "LVEDP": LVEDP,
+        "SBP": SBP, "DBP": DBP, "MAP": np.mean(P_sa),
+        "mean_LAP": mean_LAP, "PCWP": mean_LAP,
+        "mean_PAP": mean_PAP, "mean_RAP": mean_RAP,
         "v_wave": v_wave,
         "v_wave_ratio": v_wave / mean_LAP if mean_LAP > 0 else 0,
         "EA": ea, "E_pk": E_pk, "A_pk": A_pk,
-        # should be exactly constant, good sanity check
+        "LA_min": np.min(V_la), "LA_max": np.max(V_la),
+        "RA_min": np.min(V_ra), "RA_max": np.max(V_ra),
+        "RV_EDV": np.max(V_rv), "RV_ESV": np.min(V_rv),
         "V_total": np.sum(sol.y[:, -1]),
+        "waveforms": w,
     }
 
 
