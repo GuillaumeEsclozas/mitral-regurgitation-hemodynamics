@@ -1,7 +1,8 @@
-# trying L-BFGS-B first, not sure if the cost surface is smooth enough
+# L-BFGS-B kept converging to local minima, DE is slower but actually works
 
 import numpy as np
-from scipy.optimize import minimize
+from scipy.optimize import differential_evolution
+import time
 from ..model.parameters import Params
 from ..simulation.hemodynamics import run_production
 
@@ -22,19 +23,24 @@ def cost_function(x, target_obs, fixed):
     return cost
 
 
-def fit_twin(target_obs, fixed, verbose=True):
+def fit_digital_twin(target_obs, fixed, seed=42, verbose=True):
+    """Fit 3 parameters from noninvasive observables."""
     bounds = [(5.0, 35.0), (1.5, 4.0), (0.7, 1.5)]
-    x0 = [10.0, 2.7, 1.05]
-    result = minimize(cost_function, x0, args=(target_obs, fixed),
-                      method="L-BFGS-B", bounds=bounds)
+    start = time.perf_counter()
+    result = differential_evolution(
+        cost_function, bounds, args=(target_obs, fixed),
+        strategy="best1bin", maxiter=40, popsize=8,
+        tol=1e-4, mutation=(0.5, 1.0), recombination=0.7,
+        seed=seed, polish=True, init="sobol",
+    )
+    elapsed = time.perf_counter() - start
+    a, e, r_sys = result.x
     if verbose:
-        print(f"  {result.nfev} evals, cost={result.fun:.6f}")
-        print(f"  alpha={result.x[0]:.2f}, E_es={result.x[1]:.3f}, "
-              f"R_sys={result.x[2]:.3f}")
+        print(f"  {result.nfev} evals, {elapsed:.0f}s, "
+              f"cost={result.fun:.6f}")
+        print(f"  alpha={a:.2f}, E_es={e:.3f}, R_sys={r_sys:.3f}")
     return {
-        "alpha_lv": result.x[0],
-        "E_es_lv": result.x[1],
-        "R_sys": result.x[2],
-        "cost": result.fun,
-        "nfev": result.nfev,
+        "alpha_lv": a, "E_es_lv": e, "R_sys": r_sys,
+        "cost": result.fun, "nfev": result.nfev,
+        "time": elapsed,
     }
