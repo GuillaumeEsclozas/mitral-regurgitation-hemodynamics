@@ -117,6 +117,26 @@ def extract_indices(sol, p):
 
 
 def run_production(p):
+    """Full production run with all indices."""
     from .solver import simulate
     sol = simulate(p)
     return extract_indices(sol, p) if sol else None
+
+
+def run_turbo(p):
+    """Fast run for parameter estimation."""
+    from .solver import simulate_turbo
+    sol = simulate_turbo(p)
+    if sol is None:
+        return None
+    try:
+        r = extract_indices(sol, p)
+        if r["EDV"] < 30 or r["EDV"] > 300 or r["ESV"] < 5:
+            return None
+        if r["SBP"] < 40 or r["SBP"] > 250:
+            return None
+        if r["CO"] < 1.0 or r["CO"] > 12.0:
+            return None
+        return r
+    except (ValueError, RuntimeError):
+        return None

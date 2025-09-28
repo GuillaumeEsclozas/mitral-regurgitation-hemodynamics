@@ -4,12 +4,12 @@ import numpy as np
 from scipy.optimize import differential_evolution
 import time
 from ..model.parameters import Params
-from ..simulation.hemodynamics import run_production
+from ..simulation.hemodynamics import run_turbo
 
 
 def cost_function(x, target_obs, fixed):
     p = Params(**fixed, alpha_lv=x[0], E_es_lv=x[1], R_sys=x[2])
-    r = run_production(p)
+    r = run_turbo(p)
     if r is None:
         return 1e6
     cost = 0.0
@@ -29,7 +29,7 @@ def fit_digital_twin(target_obs, fixed, seed=42, verbose=True):
     start = time.perf_counter()
     result = differential_evolution(
         cost_function, bounds, args=(target_obs, fixed),
-        strategy="best1bin", maxiter=40, popsize=8,
+        strategy="best1bin", maxiter=25, popsize=5,
         tol=1e-4, mutation=(0.5, 1.0), recombination=0.7,
         seed=seed, polish=True, init="sobol",
     )
