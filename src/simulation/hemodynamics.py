@@ -3,6 +3,7 @@
 import numpy as np
 from ..model.heart import compute_pressures, compute_flows
 from ..model.chambers import edpvr
+from ..model.constants import VALVE_OPEN_THRESHOLD
 
 
 def compute_waveforms(sol, p):
@@ -35,22 +36,40 @@ def compute_waveforms(sol, p):
     }
 
 
-def extract_ea_trough(Q_mv, t):
-    # finds the valley between E and A waves. works ok at normal HR but
-    # probably breaks if waves fuse at high rates
-    peaks = []
-    for i in range(1, len(Q_mv) - 1):
-        if Q_mv[i] > Q_mv[i-1] and Q_mv[i] > Q_mv[i+1] and Q_mv[i] > 20:
-            peaks.append(i)
-    if len(peaks) < 2:
-        return None, 0, 0
-    # trough between first two peaks
-    trough_idx = peaks[0] + np.argmin(Q_mv[peaks[0]:peaks[1]])
-    E_peak = Q_mv[peaks[0]]
-    A_peak = Q_mv[peaks[1]]
-    if A_peak < 5:
-        return None, E_peak, A_peak
-    return E_peak / A_peak, E_peak, A_peak
+# trough method was failing above HR~85 or tau>40ms where waves merge.
+#  using activation onset as the split point is more robust
+def extract_ea(Q_mv, t, onset_frac=0.70):
+    """Activation-based E/A extraction."""
+    T_beat = t[-1] - t[0]
+    onset_time = onset_frac * T_beat
+    t_in_beat = t - t[0]
+    diastole_start = None
+    for i in range(len(Q_mv)):
+        if Q_mv[i] > VALVE_OPEN_THRESHOLD:
+            diastole_start = i
+            break
+    if diastole_start is None:
+        return None, 0, 0, "no_diastole"
+    onset_idx = None
+    for i in range(len(t_in_beat)):
+        if t_in_beat[i] >= onset_time:
+            onset_idx = i
+            break
+    if onset_idx is None or onset_idx <= diastole_start:
+        return None, 0, 0, "bad_timing"
+    E_peak = np.max(Q_mv[diastole_start:onset_idx])
+    A_peak = np.max(Q_mv[onset_idx:])
+    if E_peak < VALVE_OPEN_THRESHOLD and A_peak < VALVE_OPEN_THRESHOLD:
+        return None, E_peak, A_peak, "no_filling"
+    if A_peak < 10:
+        return None, E_peak, A_peak, "fused_E_dominant"
+    if E_peak < VALVE_OPEN_THRESHOLD:
+        return None, E_peak, A_peak, "fused_A_dominant"
+    ratio = E_peak / A_peak
+    pattern = ("restrictive" if ratio > 2.0
+               else "normal" if ratio > 0.8
+               else "impaired_relaxation")
+    return ratio, E_peak, A_peak, pattern
 
 
 def extract_indices(sol, p):
@@ -92,7 +111,7 @@ def extract_indices(sol, p):
             break
     v_wave = np.max(P_la[:mv_open_idx])
 
-    ea, E_pk, A_pk = extract_ea_trough(Q_mv, t)
+    ea, E_pk, A_pk, pattern = extract_ea(Q_mv, t, p.onset_la)
     EF = SV_total / EDV * 100
     EF_fwd = SV_fwd / EDV * 100
     CO = SV_fwd * p.HR / 1000
@@ -107,7 +126,7 @@ def extract_indices(sol, p):
         "mean_PAP": mean_PAP, "mean_RAP": mean_RAP,
         "v_wave": v_wave,
         "v_wave_ratio": v_wave / mean_LAP if mean_LAP > 0 else 0,
-        "EA": ea, "E_pk": E_pk, "A_pk": A_pk,
+        "EA": ea, "E_pk": E_pk, "A_pk": A_pk, "ea_pattern": pattern,
         "LA_min": np.min(V_la), "LA_max": np.max(V_la),
         "RA_min": np.min(V_ra), "RA_max": np.max(V_ra),
         "RV_EDV": np.max(V_rv), "RV_ESV": np.min(V_rv),
