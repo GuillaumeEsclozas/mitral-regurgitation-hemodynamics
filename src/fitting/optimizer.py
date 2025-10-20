@@ -7,19 +7,24 @@ from ..model.parameters import Params
 from ..simulation.hemodynamics import run_turbo
 
 
+# EA carries more info about stiffness than EF or SBP
+OBS_WEIGHTS = {"EF": 1.0, "EA": 2.0, "SBP": 1.0}
+
+
 def cost_function(x, target_obs, fixed):
+    """Weighted sum of squared relative errors."""
     p = Params(**fixed, alpha_lv=x[0], E_es_lv=x[1], R_sys=x[2])
     r = run_turbo(p)
     if r is None:
         return 1e6
     cost = 0.0
-    for obs in ["EF", "EA", "SBP"]:
+    for obs, w in OBS_WEIGHTS.items():
         sim = r[obs]
         tgt = target_obs[obs]
         if sim is None or tgt is None:
             cost += 100
         elif tgt != 0:
-            cost += ((sim - tgt) / tgt) ** 2
+            cost += w * ((sim - tgt) / tgt) ** 2
     return cost
 
 
