@@ -49,3 +49,9 @@ def fit_digital_twin(target_obs, fixed, seed=42, verbose=True):
         "cost": result.fun, "nfev": result.nfev,
         "time": elapsed,
     }
+
+
+# NOTE: tried computing confidence intervals via inverse Hessian at the
+# optimum. Doesn't work because the cost surface is essentially flat at
+# ~1e-6 near the minimum (inverse crime). The noise robustness test is
+# more honest anyway. See commit message.
