@@ -1,4 +1,4 @@
-# L-BFGS-B kept converging to local minima, DE is slower but actually works
+"""Digital twin parameter estimation via differential evolution."""
 
 import numpy as np
 from scipy.optimize import differential_evolution
@@ -6,8 +6,11 @@ import time
 from ..model.parameters import Params
 from ..simulation.hemodynamics import run_turbo
 
-
-# EA carries more info about stiffness than EF or SBP
+PARAM_BOUNDS = {
+    "alpha_lv": (5.0, 35.0),
+    "E_es_lv": (1.5, 4.0),
+    "R_sys": (0.7, 1.5),
+}
 OBS_WEIGHTS = {"EF": 1.0, "EA": 2.0, "SBP": 1.0}
 
 
@@ -30,7 +33,9 @@ def cost_function(x, target_obs, fixed):
 
 def fit_digital_twin(target_obs, fixed, seed=42, verbose=True):
     """Fit 3 parameters from noninvasive observables."""
-    bounds = [(5.0, 35.0), (1.5, 4.0), (0.7, 1.5)]
+    bounds = [PARAM_BOUNDS["alpha_lv"],
+              PARAM_BOUNDS["E_es_lv"],
+              PARAM_BOUNDS["R_sys"]]
     start = time.perf_counter()
     result = differential_evolution(
         cost_function, bounds, args=(target_obs, fixed),
@@ -40,6 +45,8 @@ def fit_digital_twin(target_obs, fixed, seed=42, verbose=True):
     )
     elapsed = time.perf_counter() - start
     a, e, r_sys = result.x
+    predictions = run_turbo(Params(**fixed, alpha_lv=a,
+                                    E_es_lv=e, R_sys=r_sys))
     if verbose:
         print(f"  {result.nfev} evals, {elapsed:.0f}s, "
               f"cost={result.fun:.6f}")
@@ -47,7 +54,7 @@ def fit_digital_twin(target_obs, fixed, seed=42, verbose=True):
     return {
         "alpha_lv": a, "E_es_lv": e, "R_sys": r_sys,
         "cost": result.fun, "nfev": result.nfev,
-        "time": elapsed,
+        "time": elapsed, "predictions": predictions,
     }
 
 
