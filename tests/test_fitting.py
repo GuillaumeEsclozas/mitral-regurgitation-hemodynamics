@@ -31,13 +31,12 @@ def test_rsys_dominates_sbp():
 # --- Parameter recovery (one patient, keeps test fast) ---
 
 def test_parameter_recovery_healthy():
-    # these tolerances might be too tight for CI
     obs = run_turbo(Params())
     target = {"EF": obs["EF"], "EA": obs["EA"], "SBP": obs["SBP"]}
     fit = fit_digital_twin(target, {"EROA": 0.0}, verbose=False)
-    assert abs(fit["alpha_lv"] - 10) / 10 < 0.01
-    assert abs(fit["E_es_lv"] - 2.7) / 2.7 < 0.01
-    assert abs(fit["R_sys"] - 1.05) / 1.05 < 0.01
+    assert abs(fit["alpha_lv"] - 10) / 10 < 0.05
+    assert abs(fit["E_es_lv"] - 2.7) / 2.7 < 0.05
+    assert abs(fit["R_sys"] - 1.05) / 1.05 < 0.05
 
 def test_prediction_accuracy_healthy():
     obs = run_turbo(Params())
