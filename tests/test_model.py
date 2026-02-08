@@ -134,3 +134,21 @@ def test_mr_constant_derivation():
 
 def test_params_T():
     assert abs(Params().T - 0.8) < 1e-10
+
+def test_params_replace():
+    p = Params().replace(EROA=0.3)
+    assert p.EROA == 0.3
+    assert p.E_es_lv == 2.7
+
+def test_params_frozen():
+    p = Params()
+    with pytest.raises(AttributeError):
+        p.E_es_lv = 999
+
+def test_params_negative_eroa_rejected():
+    with pytest.raises(ValueError):
+        Params(EROA=-1)
+
+def test_params_zero_ees_rejected():
+    with pytest.raises(ValueError):
+        Params(E_es_lv=0)
