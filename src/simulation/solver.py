@@ -13,8 +13,7 @@ def simulate(p, n_beats=30, n_eval=1000,
     y_cur = INITIAL_VOLUMES.copy()
     sv_prev = None
     for beat in range(n_beats):
-        t_s = beat * T
-        t_e = (beat + 1) * T
+        t_s = beat * T; t_e = (beat + 1) * T
         sol = solve_ivp(rhs, [t_s, t_e], y_cur, method="RK45",
                         args=(p,), rtol=rtol, atol=atol,
                         max_step=max_step,
@@ -36,8 +35,7 @@ def simulate_turbo(p):
     y_cur = INITIAL_VOLUMES.copy()
     sv_prev = None
     for beat in range(20):
-        t_s = beat * T
-        t_e = (beat + 1) * T
+        t_s = beat * T; t_e = (beat + 1) * T
         sol = solve_ivp(rhs, [t_s, t_e], y_cur, method="RK45",
                         args=(p,), rtol=1e-4, atol=1e-6, max_step=0.01)
         if not sol.success:

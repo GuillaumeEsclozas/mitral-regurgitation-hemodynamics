@@ -6,16 +6,14 @@ from .valves import valve_flow, mr_flow
 from .parameters import Params
 
 
-def compute_pressures(y, t, p):
+def compute_pressures(y: np.ndarray, t: float, p: Params) -> tuple:
+    """All 8 compartment pressures from state vector and time."""
     V_lv, V_la, V_rv, V_ra, V_sa, V_sv, V_pa, V_pv = y
-    T = p.T
-    b = p.beta
-
+    T = p.T; b = p.beta
     e_lv = activation_ventricle(t, T, p.T_es_lv, p.tau_lv)
     e_rv = activation_ventricle(t, T, p.T_es_rv, p.tau_rv)
     e_la = activation_atrium(t, T, p.T_as_la, p.onset_la)
     e_ra = activation_atrium(t, T, p.T_as_ra, p.onset_ra)
-
     P_lv = chamber_pressure(V_lv, e_lv, p.E_es_lv, p.V_d_lv,
                              p.V0_lv, p.alpha_lv, b, p.V_ref_lv)
     P_rv = chamber_pressure(V_rv, e_rv, p.E_es_rv, p.V_d_rv,
@@ -31,7 +29,7 @@ def compute_pressures(y, t, p):
     return P_lv, P_la, P_rv, P_ra, P_sa, P_sv, P_pa, P_pv
 
 
-def compute_flows(pressures, p):
+def compute_flows(pressures: tuple, p: Params) -> tuple:
     """All 9 flows from pressures."""
     P_lv, P_la, P_rv, P_ra, P_sa, P_sv, P_pa, P_pv = pressures
     k = p.k_valve
@@ -48,7 +46,7 @@ def compute_flows(pressures, p):
     )
 
 
-def rhs(t, y, p):
+def rhs(t: float, y: np.ndarray, p: Params) -> list:
     """ODE right-hand side. Used everywhere via args=(p,)."""
     pressures = compute_pressures(y, t, p)
     Q_mv, Q_av, Q_tc, Q_pv_v, Q_sys, Q_pul, Q_pv_la, Q_sv_ra, Q_mr = \

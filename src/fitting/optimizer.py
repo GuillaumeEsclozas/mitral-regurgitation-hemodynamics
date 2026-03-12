@@ -22,8 +22,7 @@ def cost_function(x, target_obs, fixed):
         return 1e6
     cost = 0.0
     for obs, w in OBS_WEIGHTS.items():
-        sim = r[obs]
-        tgt = target_obs[obs]
+        sim = r[obs]; tgt = target_obs[obs]
         if sim is None or tgt is None:
             cost += 100
         elif tgt != 0:
@@ -56,9 +55,3 @@ def fit_digital_twin(target_obs, fixed, seed=42, verbose=True):
         "cost": result.fun, "nfev": result.nfev,
         "time": elapsed, "predictions": predictions,
     }
-
-
-# NOTE: tried computing confidence intervals via inverse Hessian at the
-# optimum. Doesn't work because the cost surface is essentially flat at
-# ~1e-6 near the minimum (inverse crime). The noise robustness test is
-# more honest anyway. See commit message.

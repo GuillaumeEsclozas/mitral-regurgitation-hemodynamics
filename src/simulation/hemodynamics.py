@@ -7,26 +7,17 @@ from ..model.constants import VALVE_OPEN_THRESHOLD
 
 
 def compute_waveforms(sol, p):
-    t = sol.t
-    n = len(t)
-    P_lv = np.zeros(n)
-    P_la = np.zeros(n)
-    P_rv = np.zeros(n)
-    P_ra = np.zeros(n)
-    P_sa = np.zeros(n)
-    P_pa = np.zeros(n)
-    Q_mv = np.zeros(n)
-    Q_av = np.zeros(n)
-    Q_mr = np.zeros(n)
-
+    """Compute all pressures and flows from an ODE solution."""
+    t = sol.t; n = len(t)
+    P_lv = np.zeros(n); P_la = np.zeros(n); P_rv = np.zeros(n)
+    P_ra = np.zeros(n); P_sa = np.zeros(n); P_pa = np.zeros(n)
+    Q_mv = np.zeros(n); Q_av = np.zeros(n); Q_mr = np.zeros(n)
     for i, ti in enumerate(t):
         pressures = compute_pressures(sol.y[:, i], ti, p)
         P_lv[i], P_la[i], P_rv[i], P_ra[i], P_sa[i], _, P_pa[i], _ = pressures
         flows = compute_flows(pressures, p)
-        Q_mv[i] = flows[0]
-        Q_av[i] = flows[1]
+        Q_mv[i], Q_av[i] = flows[0], flows[1]
         Q_mr[i] = flows[8]
-
     return {
         "t": t, "V_lv": sol.y[0], "V_la": sol.y[1],
         "V_rv": sol.y[2], "V_ra": sol.y[3],
@@ -36,8 +27,6 @@ def compute_waveforms(sol, p):
     }
 
 
-# trough method was failing above HR~85 or tau>40ms where waves merge.
-#  using activation onset as the split point is more robust
 def extract_ea(Q_mv, t, onset_frac=0.70):
     """Activation-based E/A extraction."""
     T_beat = t[-1] - t[0]
@@ -76,34 +65,21 @@ def extract_indices(sol, p):
     """Extract all hemodynamic indices from a simulation solution."""
     w = compute_waveforms(sol, p)
     t = w["t"]
-    V_lv = w["V_lv"]
-    V_la = w["V_la"]
-    V_rv = w["V_rv"]
-    V_ra = w["V_ra"]
-    P_lv = w["P_lv"]
-    P_la = w["P_la"]
-    P_sa = w["P_sa"]
-    P_pa = w["P_pa"]
-    P_ra = w["P_ra"]
-    Q_mv = w["Q_mv"]
-    Q_av = w["Q_av"]
-    Q_mr = w["Q_mr"]
+    V_lv = w["V_lv"]; V_la = w["V_la"]
+    V_rv = w["V_rv"]; V_ra = w["V_ra"]
+    P_lv = w["P_lv"]; P_la = w["P_la"]
+    P_sa = w["P_sa"]; P_pa = w["P_pa"]; P_ra = w["P_ra"]
+    Q_mv = w["Q_mv"]; Q_av = w["Q_av"]; Q_mr = w["Q_mr"]
 
-    # LV volumes and pressures
-    EDV = np.max(V_lv)
-    ESV = np.min(V_lv)
-    SV_total = EDV - ESV
+    EDV = np.max(V_lv); ESV = np.min(V_lv); SV_total = EDV - ESV
     dt = np.diff(t)
     SV_fwd = np.sum(np.maximum(0.5 * (Q_av[:-1] + Q_av[1:]), 0) * dt)
     RegVol = np.sum(np.maximum(0.5 * (Q_mr[:-1] + Q_mr[1:]), 0) * dt)
     LVEDP = edpvr(EDV, p.V0_lv, p.alpha_lv, p.beta, p.V_ref_lv)
-    SBP = np.max(P_sa)
-    DBP = np.min(P_sa)
-    mean_LAP = np.mean(P_la)
-    mean_PAP = np.mean(P_pa)
+    SBP = np.max(P_sa); DBP = np.min(P_sa)
+    mean_LAP = np.mean(P_la); mean_PAP = np.mean(P_pa)
     mean_RAP = np.mean(P_ra)
 
-    # v-wave: peak LA pressure before MV opens
     mv_open_idx = len(P_la) - 1
     for i in range(50, len(P_la)):
         if P_la[i] > P_lv[i]:

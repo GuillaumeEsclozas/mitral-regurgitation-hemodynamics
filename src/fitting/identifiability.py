@@ -10,17 +10,14 @@ def compute_jacobian(base_params, delta_frac=0.02):
 
     Returns (J_normalized, condition_number, eigenvalues).
     """
-    # condition number < ~10 means the 3 params are distinguishable from these obs
     param_names = ["alpha_lv", "E_es_lv", "R_sys"]
     obs_names = ["EF", "EA", "SBP"]
     J = np.zeros((3, 3))
     for j, pname in enumerate(param_names):
         p_val = base_params[pname]
         delta = p_val * delta_frac
-        pp = dict(base_params)
-        pp[pname] = p_val + delta
-        pm = dict(base_params)
-        pm[pname] = p_val - delta
+        pp = dict(base_params); pp[pname] = p_val + delta
+        pm = dict(base_params); pm[pname] = p_val - delta
         rp = run_turbo(Params(**pp))
         rm = run_turbo(Params(**pm))
         if rp is None or rm is None:
