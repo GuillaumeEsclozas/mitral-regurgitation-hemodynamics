@@ -2,7 +2,10 @@
 
 [![CI](https://github.com/GuillaumeEsclozas/mitral-regurgitation-hemodynamics/actions/workflows/ci.yml/badge.svg)](https://github.com/GuillaumeEsclozas/mitral-regurgitation-hemodynamics/actions/workflows/ci.yml)
 
-0D lumped-parameter cardiovascular model with digital twin layer for mitral regurgitation. Predicts LVEDP and PCWP from noninvasive echo inputs (EF, E/A, SBP) with ±2.5 mmHg accuracy under measurement noise, vs ±6 mmHg for the standard E/e' approach.
+0D lumped-parameter cardiovascular model with a digital twin layer 
+for mitral regurgitation. Fits 3 parameters from noninvasive echo 
+(EF, E/A, SBP) to predict LVEDP and PCWP at ±2.5 mmHg under 
+measurement noise, where the standard E/e' approach gives ±6 mmHg.
 
 <p align="center">
   <img src="figures/fig_heatmap_lap.png" width="50%" />
