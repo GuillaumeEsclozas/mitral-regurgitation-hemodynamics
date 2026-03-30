@@ -99,15 +99,10 @@ print(f"PCWP = {fit['predictions']['PCWP']:.1f} mmHg")
 ## References
 
 Holmes & Lumens (2018). Clinical applications of patient-specific models: the case for a simple approach. J Cardiovasc Transl Res 11:71-79.
-
 Niederer, Lumens & Trayanova (2019). Computational models in cardiology. Nat Rev Cardiol 16:100-111.
-
 Grayburn et al. (2019). Proportionate and disproportionate functional MR. JACC Cardiovasc Imaging.
-
 Van Osta et al. (2020). Parameter subset reduction for patient-specific modelling. Phil Trans R Soc A 378:20190347.
-
 Klotz et al. (2006). Single-beat estimation of end-diastolic PV relationship. Am J Physiol Heart Circ Physiol.
-
 Korakianitis & Shi (2006). Concentrated parameter model for the human cardiovascular system. J Biomech 39(11):1964-82.
 
 ## Acknowledgments
