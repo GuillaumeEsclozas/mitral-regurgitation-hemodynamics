@@ -2,10 +2,12 @@
 
 [![CI](https://github.com/GuillaumeEsclozas/mitral-regurgitation-hemodynamics/actions/workflows/ci.yml/badge.svg)](https://github.com/GuillaumeEsclozas/mitral-regurgitation-hemodynamics/actions/workflows/ci.yml)
 
-0D lumped-parameter cardiovascular model with a digital twin layer 
-for mitral regurgitation. Fits 3 parameters from noninvasive echo 
-(EF, E/A, SBP) to predict LVEDP and PCWP at ±2.5 mmHg under 
-measurement noise, where the standard E/e' approach gives ±6 mmHg.
+Closed-loop cardiovascular model (0D, 8 compartments) that simulates 
+mitral regurgitation hemodynamics beat by beat. On top of the forward 
+model sits a digital twin layer that fits 3 parameters from noninvasive 
+echo measurements (EF, E/A, SBP) and predicts invasive pressures 
+(LVEDP, PCWP) at ±2.5 mmHg under noise. The standard E/e' approach 
+gives ±6 mmHg.
 
 <p align="center">
   <img src="figures/fig_heatmap_lap.png" width="50%" />
