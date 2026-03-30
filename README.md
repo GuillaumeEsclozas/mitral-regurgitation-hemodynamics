@@ -4,7 +4,9 @@
 
 0D lumped-parameter cardiovascular model with digital twin layer for mitral regurgitation. Predicts LVEDP and PCWP from noninvasive echo inputs (EF, E/A, SBP) with ±2.5 mmHg accuracy under measurement noise, vs ±6 mmHg for the standard E/e' approach.
 
-![EROA x stiffness interaction on left atrial pressure](figures/fig_heatmap_lap.png)
+<p align="center">
+  <img src="figures/fig_heatmap_lap.png" width="50%" />
+</p>
 
 ## Approach
 
@@ -16,13 +18,17 @@ Healthy baseline hits all 13 hemodynamic targets (EF 57.5%, BP 118/82, CO 5.40 L
 
 ### Pressure-volume response to MR
 
-![PV loops across MR severity](figures/fig_pv_loops.png)
+<p align="center">
+  <img src="figures/fig_pv_loops.png" width="50%" />
+</p>
 
 Progressive volume overload shifts the loop rightward. Stroke volume increases but forward output drops because an increasing fraction regurgitates into the left atrium.
 
 ### EF paradox
 
-![The EF paradox in mitral regurgitation](figures/fig_ef_paradox.png)
+<p align="center">
+  <img src="figures/fig_ef_paradox.png" width="50%" />
+</p>
 
 EROA (cm²) | Total EF | Forward EF | CO (L/min) | Mean LAP (mmHg)
 :---:|:---:|:---:|:---:|:---:
@@ -34,7 +40,9 @@ Total EF rises because the LV ejects into two outlets. Forward EF, the part that
 
 ### Disproportionate MR
 
-![LA pressure waveforms: disproportionate MR](figures/fig_la_waveforms.png)
+<p align="center">
+  <img src="figures/fig_la_waveforms.png" width="50%" />
+</p>
 
  | Patient A (EROA=0.4, normal) | Patient B (EROA=0.25, stiff)
 :---|:---:|:---:
@@ -97,10 +105,15 @@ print(f"PCWP = {fit['predictions']['PCWP']:.1f} mmHg")
 ## References
 
 Holmes & Lumens (2018). Clinical applications of patient-specific models: the case for a simple approach. J Cardiovasc Transl Res 11:71-79.
+
 Niederer, Lumens & Trayanova (2019). Computational models in cardiology. Nat Rev Cardiol 16:100-111.
+
 Grayburn et al. (2019). Proportionate and disproportionate functional MR. JACC Cardiovasc Imaging.
+
 Van Osta et al. (2020). Parameter subset reduction for patient-specific modelling. Phil Trans R Soc A 378:20190347.
+
 Klotz et al. (2006). Single-beat estimation of end-diastolic PV relationship. Am J Physiol Heart Circ Physiol.
+
 Korakianitis & Shi (2006). Concentrated parameter model for the human cardiovascular system. J Biomech 39(11):1964-82.
 
 ## Acknowledgments
